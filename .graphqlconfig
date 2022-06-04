@@ -1,0 +1,31 @@
+{
+  "name": "Safaricom GraphQL Schema",
+  "projects": {
+    "mpesa": {
+      "name": "M-Pesa & M-Ledger",
+      "schemaPath": "mpesa.schema.graphql",
+      "includes": [
+        "shared.schema.graphql"
+      ]
+    },
+    "airtime": {
+      "schemaPath": "airtime.schema.graphql",
+      "includes": [
+        "shared.schema.graphql"
+      ]
+    }
+  },
+  "extensions": {
+    "endpoints": {
+      "Default GraphQL Endpoint": {
+        "url": "https://safaricom.com/graphql",
+        "headers": {
+          "origin": "https://safaricom.com",
+          "content-type": "application/json",
+          "hetoken": "${env:ACCESS_TOKEN}"
+        },
+        "introspect": false
+      }
+    }
+  }
+}
