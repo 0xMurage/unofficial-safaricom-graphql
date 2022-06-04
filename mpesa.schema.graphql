@@ -1,0 +1,101 @@
+extend type DefaultResponse{
+}
+
+
+type MpesaRecentTransaction{
+    id:String
+    type: String
+    amount:String
+    date:String
+    partyBAccountNo:String
+    partyBName:String
+    reversible:String #boolean of string
+    shareable:String  #boolean of string
+    narrative:String
+}
+
+type MledgerAccountStatus{
+    accountNo:String
+    activated:Boolean
+    receiveMonthlyStatement:Boolean
+    aggregatedCreditYears:[String]
+    aggregatedDebitYears:[String]
+}
+
+type MledgerPartySummary{
+    account:String
+    name:String
+    amount:String
+}
+
+type MledgerCategorySummary{
+    id:String
+    category:String
+    percentage:String
+    amount:String
+    parties:[MledgerPartySummary]
+}
+
+type MledgerSummary{
+    totalAmount:String
+    category:[MledgerCategorySummary]
+}
+
+type MledgerTransactionDetails{
+    id:String
+    type:String
+    amount:String
+    date:String
+    partyBAccountNo:String #e.g. 9 for Airtime
+    partyBName:String #e.g. 999999999 for Safaricom  account
+}
+
+type MpesaCharges{
+    id:Int
+    minAmount:Int
+    maxAmount:Int
+    sendToRegistered:Int
+    sendToUnregistered:Int
+    agentWithdrawal:Int
+    atmWithdrawal:Int
+    sendToRegisteredOtherMno:Int
+}
+
+type MerchantDetails{
+    merchantCode:String
+    merchantName:String
+    transactionCost: String #includes word "ksh"
+    vicinityRcode: String
+    vicinityRmsg:String
+}
+
+
+input MledgerTransactionDetailsInput{
+    id:String!
+    type:String!
+    amount:String!
+    date:String!
+    partyBAccountNo:String!
+    partyBName:String!
+}
+
+extend type Query {
+
+    getMpesaAllCharges:[MpesaCharges]
+    getMpesaPaybillCharges(transactionType:String!,amount:String!,partyB:String!):MerchantDetails   #Transaction Types: paybill or tillNumber
+    getMpesaStatementStatus:DefaultResponse
+    getRecentMpesaTransactions:[MpesaRecentTransaction]
+
+    #M-ledger
+    getMledgerStatus:MledgerAccountStatus
+    getMledgerDebitSummary(year:String!,month:String!):MledgerSummary #months start at 0
+    getMledgerDebits(year:String!,month:String!,partyBAccountNo:String!,category:String!):MledgerTransactionDetails
+
+    getSortedArrayofObjects(key:String!,order:String!,array:[MledgerTransactionDetailsInput]!):MledgerTransactionDetails
+}
+
+extend type Mutation{
+    MledgerOptIn:DefaultResponse
+    getMpesaStatements(period:Int!):DefaultResponse #period is number of months past today. Max 12
+    changeMpesaStatementsEmail(email:String!,identification:String!):DefaultResponse #identification = passport or ID
+}
