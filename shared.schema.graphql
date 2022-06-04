@@ -44,11 +44,14 @@ type Query {
     isAuthenticated(page:String!):OtpValidated
 
     getCustomerInfo:CustomerInfo
+
+    validateServicePinSession:DefaultResponse
+
 }
 
 type Mutation{
     validateOTP(otp:Int!, page:String!): OtpValidation     #page can be  "/mpesa", "/account/top-up"
     isAuthenticated(page:String!):OtpValidated
 
-    validateServicePinSession:DefaultResponse
+    validateServicePinSession(servicePin:Float!):DefaultResponse
 }
