@@ -1,0 +1,54 @@
+type DefaultResponse{
+    status:Boolean
+    message:String
+}
+
+type Result{
+    status:Boolean,
+    message:String,
+    token:String
+}
+
+type OtpValidation{
+    status:Boolean
+    message: String
+    extraDetails:String
+}
+
+type OtpValidated{
+    status:Boolean
+}
+
+type MobileResult{
+    status:Boolean
+    message: String
+    token:String
+    proceed:Boolean
+    hash:String
+}
+
+type CustomerInfo{
+    status:Boolean
+    message:String
+    customerType:String #Prepaid, Postpaid
+    firstName:String
+    lastName:String
+    idNumber:String
+}
+
+
+type Query {
+    generateToken:Result #generates access token
+    generateOTP:DefaultResponse
+    getToken:MobileResult
+    isAuthenticated(page:String!):OtpValidated
+
+    getCustomerInfo:CustomerInfo
+}
+
+type Mutation{
+    validateOTP(otp:Int!, page:String!): OtpValidation     #page can be  "/mpesa", "/account/top-up"
+    isAuthenticated(page:String!):OtpValidated
+
+    validateServicePinSession:DefaultResponse
+}
