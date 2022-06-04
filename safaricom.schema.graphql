@@ -1,0 +1,262 @@
+extend type DefaultResponse{
+}
+
+type BalanceDetail{
+    dueDate:String
+    balanceId:Int
+    balanceName:String
+    balanceCode:String
+    balanceUnits:String #KES,Points
+    balanceExpiry:String
+    balanceAvailable:Float
+    totalCreditAmount:Float
+    currentCreditUsage:Float
+    outstandingCreditUsage:Float
+}
+
+type Balances{
+    category:String #Airtime,Bonga,Data
+    categoryCode:String
+    totalBalance:Float
+    active:Boolean
+    measurementUnit:String
+    balanceExpiry: String
+    balanceDetails:[BalanceDetail]
+}
+
+type Subscriptions{
+    activeItems: Int
+    category: String #"Premium Services & Games","Data Bundles","SMS Plans","All In One"
+    platform: String #sdp,cbs,
+    subscriptions: [SubscriptionDetails]
+    imageUrl: String
+}
+
+type SubscriptionDetails{
+    amount: String
+    offerName:String
+    offeringId: String #e.g. "793386506" for data saving
+    productId: String
+}
+
+type UsageLimit{
+    beginDate: String
+    category: String #"data" or "airtime"
+    endDate:String
+    limitType: String
+    setLimit: String
+    type: String #"daily","weekly","monthly"
+    usedAmount: String
+}
+
+type VoucherTopUp{
+    responseCode:String
+    message:String
+    balance:Float
+    amount:Int
+    time:String
+    expiryDate:String
+}
+
+type ChildBundles{
+    autoRenew: Boolean
+    productAmount: Int
+    productId: String
+    productName: String
+    productUnits:String #"KES"
+}
+
+type PackageList{
+    childHeading:String
+    childBundles:[ChildBundles]
+}
+
+type OldBundleList{
+    packageName:String
+    packageList:[PackageList]
+}
+
+type DataSponsor{ #typename and data types not confirmed
+    msisdn:String
+    limitValue:String
+    limitValue:String
+    usageValue:String
+    startTime:String
+    endTime:String
+    bundleType:String
+}
+
+type oldBundlePurchase {
+    status:Boolean
+    description:String
+}
+
+type AggregatedDataUsagePercentage{
+    displayName:String
+    percent:String
+}
+
+type AggregatedDataUsage{
+    id:String
+    serviceId:String
+    displayName:String
+    dateHour:String
+    description:String
+    data:String
+}
+
+type AggregatedDataUsages{
+    total:String
+    cbsTotal:String
+    preciseAccuracy:String
+    allowedVariance:String
+    usage:[AggregatedDataUsage]
+    percentages:[AggregatedDataUsagePercentage]
+}
+
+type AggregatedAirtimeUsage {
+    id:String
+    serviceType:String
+    volume:String
+    airtimeSpent:String
+    extraInfo:String
+    dateHour:String
+    middleTitle:String
+
+}
+
+type AggregatedAirtimeUsagePercentage {
+    displayName:String
+    percent:String
+}
+
+type AggregatedAirtimeUsages{
+    total:String
+    usage:[AggregatedAirtimeUsage]
+    percentages:[AggregatedAirtimeUsagePercentage]
+}
+
+type BongaBalanceResult{
+    balance: String
+    message: String
+    status: String
+    timestamp: String
+}
+
+type BongaMatrix{
+    resourceName:String
+    resources:[BongaResources]
+}
+
+type BongaResources{
+    bongaPoints: Int
+    displayName: String
+    resourceName: String
+    resourceType: String
+    resourceUnit:Int
+}
+
+type BongaDealsHistory{
+    burnDate: String
+    cancelDate: String
+    createdDateTime: String
+    expiryDate: String
+    formattedExpiryDate: String
+    offerName: String
+    status:String
+    transactionId: String
+}
+type BongaRedeemData{
+    couponNumber:String
+    errorCode:String
+    expiryDate:String
+    message:String
+    status:Boolean
+}
+
+type BongaDeals{
+    Description: String
+    ExpiryDate: String
+    Image: String
+    discount: String
+    merchant: String
+    offerNumber: String
+    terms: String
+    title: String
+}
+
+type BongaRedeemHistoryResult{
+    bongaPointsBalance: Float
+    bongaPointsRedeemed: Float
+    redemptionDate: String
+    resourceName: String
+    resourceType:String
+    resourceValue: Int
+}
+
+type BongaAccumulationHistoryResult{
+    accumulationDate: String
+    bongaPointsAccumulated: Float
+    bongaPointsBalance: Float
+}
+
+extend type Query {
+    getBalances:[Balances]
+    getMySubscriptions:[Subscriptions]
+    getUsageLimits:[UsageLimit]
+    getDataManagerStatus:DefaultResponse #check if data manager is enabled
+
+    querySponsor: [DataSponsor] #get all data sponsor
+    queryBeneficiary: [DataSponsor] #get all data beneficiaries
+
+    getBongaBalance:BongaBalanceResult
+
+
+    getAggregatedDataUsage(startDate:String!,endDate:String!):AggregatedDataUsages
+    getAggregatedAirtimeUsage(startDate:String!,endDate:String!):AggregatedAirtimeUsages
+
+    #OTHERS
+    getOldBundleList: [OldBundleList]
+
+    #features e.g. # skiza, usageLimit, fireworkReels, mpesa-unlock,fraud,ba,promotional,heavyDataUsageAlert,datasharing,bongaFood
+    getFeatureStatus(featureName:String!):DefaultResponse
+
+    #bonga related
+    getActiveBongaDeals:[BongaDealsHistory]
+    getBongaDeals:[BongaDeals]
+
+    #date example: "2022-05-05T00:00:00". Dates should not exceed 90 days from yesterday
+    getBongaRedeemHistory(startDate:String!,endDate:String!):[BongaRedeemHistoryResult]
+    getBongaAccumulatedHistory(startDate:String!,endDate:String!):[BongaAccumulationHistoryResult] #as above
+    getBongaDealsHistory:[BongaDealsHistory]
+}
+
+extend type Mutation{
+
+    consumeVoucher(otherNumber:String!,voucherPin:String!):VoucherTopUp #First create+validate OTP
+    #Sambaza where partyB=recipient phone number,transferMode='prepay',resourceType="airtime",accountType=""
+    sambaza(partyB:String!,accountType:String!,resourceType:String,resourceAmount:Int!,transferMode:String!):DefaultResponse  #First create+validate OTP
+
+    changeDataManagerStatus(status:Boolean!):DefaultResponse #activate or deactivate data manager
+
+    #to activate data saving, send below query where productId="793386506",amount:0,sponsorNumber:"N/A".
+    #same query is used to purchase packages retrieved by getOldBundleList query - with specified amount
+    oldBundleAirtimePurchase(productId:String!,amount:Float!,sponsorNumber:String!):[OldBundleList]
+    #to deactivate data saving, send below query where #productId="793386506"
+    bundlesUnsubscribe(productId:String!):DefaultResponse
+
+    #buy databundles via mpesa where productId="2088444", sponsorNumber="N/A"
+    oldBundleMpesaPurchase(productId:String!,amount:String!,sponsorNumber:String!):oldBundlePurchase
+
+    #OTHERS
+    bongaTransfer(amount:Float!,partyB:String!):DefaultResponse     #requires service pin validation first
+    bongaRedeem(amount:Float!,resourceType:String!):DefaultResponse #redeem bonga for getActiveBongaDeals query returned resource
+    redeemRewards(offerNumber:String!):BongaRedeemData #query  getBongaDeals for offerNumber
+
+    #set  usage limit where limitValue is in Mbs for data and ksh for airtime and
+    #limitTypes="DataDaily","DataWeekly","DataMonthly","AirtimeDaily","AirtimeWeekly","AirtimeMonthly"
+    addUsageLimit(limitType: String!, limitValue: Int!): DefaultResponse
+    changeUsageLimit(limitType: String!, limitValue: Int!,newLimitValue:Int!): DefaultResponse #update usage limit
+
+    validateUser:DefaultResponse #check if customer is a brand ambassador
+}
